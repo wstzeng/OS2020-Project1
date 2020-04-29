@@ -18,7 +18,7 @@ static int n_proc_fin;
 /* Current unit time clock */
 static int ut_clk;
 /* RR */
-static int t_last;
+static int t_curr;
 
 int cmp(const void *proc_a, const void *proc_b)
 {
@@ -34,7 +34,7 @@ int next_proc_FIFO(Process *proc_set, int n_proc)
 	for (int i = 0; i < n_proc; i++) {
 		if (proc_set[i].pid == NOT_READY || proc_set[i].t_exec == 0)
 			continue;
-		if (ret == NOT_READY || proc_set[i].t_ready < proc_set[ret].t_ready)
+		if (ret == NOT_READY)
 			ret = i;
 	}
 	return ret;
@@ -42,7 +42,7 @@ int next_proc_FIFO(Process *proc_set, int n_proc)
 
 int next_proc_RR(Process *proc_set, int n_proc, Queue *rr_que)
 {
-	if (curr != NOT_READY && ((ut_clk - t_last) % TIME_QUAT) != 0)
+	if (curr != NOT_READY && ((ut_clk - t_curr) % TIME_QUAT) != 0)
 		return curr;
 
 	int ret = NOT_READY;
@@ -52,13 +52,13 @@ int next_proc_RR(Process *proc_set, int n_proc, Queue *rr_que)
 		fprintf(stderr, "RR Cond-1: %d\n", ret);
 #endif
 		ret = dequeue(rr_que);
-		t_last = ut_clk;
+		t_curr = ut_clk;
 	}
-	else if (curr != NOT_READY && ((ut_clk - t_last) % TIME_QUAT) == 0) {
+	else if (curr != NOT_READY && ((ut_clk - t_curr) % TIME_QUAT) == 0) {
 		if (proc_set[curr].t_exec != 0)
 			enqueue(rr_que, curr);
 		ret = dequeue(rr_que);
-		t_last = ut_clk;
+		t_curr = ut_clk;
 #ifdef DEBUG
 		fprintf(stderr, "RR Cond-2: %d\n", ret);
 #endif
