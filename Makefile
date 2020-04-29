@@ -1,10 +1,11 @@
-CC := gcc
-SRCS := $(wildcard *.c)
-OBJS := $(SRCS:.c=.o)
-IN_DIR := /home/wstcsie/OS2020/OS_PJ1_Test/
-TASK_IN := $(sort $(wildcard $(IN_DIR)*.txt))
-TASK := $(patsubst $(IN_DIR)%.txt, %, $(TASK_IN))
-TASK_OUT := $(TASK_IN:$(IN_DIR)%.txt=output/%_stdout.txt)
+CC = gcc
+SRCS = $(wildcard *.c)
+OBJS = $(SRCS:.c=.o)
+IN_DIR = ../OS_PJ1_Test/
+OUT_DIR = output/
+TASK_IN = $(sort $(wildcard $(IN_DIR)*.txt))
+TASK_OUT = $(TASK_IN:$(IN_DIR)%.txt=$(OUT_DIR)%_stdout.txt)
+TASK = $(patsubst $(IN_DIR)%.txt, %, $(TASK_IN))
 DEMO = TIME_MEASUREMENT.txt FIFO_1.txt PSJF_2.txt RR_3.txt SJF_4.txt
 CFLAG := 
 
@@ -16,30 +17,39 @@ all: $(OBJS)
 %.o: %.c
 	$(CC) -c $< $(CFLAG)
 
-run: clean_out $(TASK)
-	@echo "Done!"
-
 demo:
 	@for i in $(DEMO); \
-	do make --no-print-directory demo_each INPUT=OS_PJ1_Test/$$i; \
+	do make --no-print-directory $(patsubst %.txt, %, $(DEMO)) IN=$(IN_DIR)$$i; \
 	done
 
-demo_each:
-	@echo
-	sudo dmesg --clear
-	sudo ./main <$(INPUT)
-	dmesg | grep Project1
-
 $(TASK): 
-	@[ -d ./output/ ] || mkdir ./output/
 	sudo dmesg --clear
-	sudo ./main <$(IN_DIR)$@.txt >output/$@_stdout.txt
-	dmesg | grep Project1 >output/$@_dmesg.txt
-	@echo "================================================================"
+	sudo ./main < $(patsubst %, $(IN_DIR)%.txt, $@)
+	dmesg | grep Project1
+	@echo
 
-veri: demo
-	for i in $(patsubst %.txt, %_dmesg.txt, $(DEMO)); \
-	do ../pj1_ver<output/$$i; \
+$(TASK_OUT):
+	sudo dmesg --clear
+	sudo ./main < $(patsubst $(OUT_DIR)%_stdout.txt, $(IN_DIR)%.txt, $@) > $@
+	dmesg | grep Project1 > $(patsubst %_stdout.txt, %_dmesg.txt, $@)
+	@echo
+
+run:
+	@for task in $(TASK); \
+	do make --no-print-directory $$task; \
+	done;
+	@echo "Done!"
+
+out2file: clean_out
+	@[ -d $(OUT_DIR) ] || mkdir $(OUT_DIR)
+	@for task in $(TASK_OUT); \
+	do make --no-print-directory $$task; \
+	done
+	@echo "Done!"
+
+check: $(patsubst %.txt, $(OUT_DIR)%_dmesg.txt, $(DEMO))
+	@for i in $(patsubst %.txt, %_dmesg.txt, $(DEMO)); \
+	do ../pj1checker<$(OUT_DIR)$$i; \
 	echo ""; \
 	done;
 
