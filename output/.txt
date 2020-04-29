@@ -1,4 +1,0 @@
-sudo ./main < ../OS_PJ1_Test/FIFO_2.txt 
-P1 7603
-P2 7604
-Makefile:26: recipe for target 'FIFO_2' failed
