@@ -67,8 +67,12 @@ int proc_work(pid_t pid)
 		return -1;
 	}
 	int ni = setpriority(PRIO_PROCESS, pid, NICE_WORK);
+	if (ni < 0) {
+		perror("setpriority");
+		return -1;
+	}
 
-	return ret;
+	return 0;
 }
 
 int proc_idle(pid_t pid)
@@ -76,15 +80,19 @@ int proc_idle(pid_t pid)
 	struct sched_param param;
 	param.sched_priority = 0;
 #ifdef DEBUG
-	fprintf(stderr, "%d work.\n", pid);
+	fprintf(stderr, "%d idle.\n", pid);
 #endif
 
-	int ret = sched_setscheduler(pid, SCHED_IDLE, &param);
-	if (ret < 0) {
+	int set = sched_setscheduler(pid, SCHED_IDLE, &param);
+	if (set < 0) {
 		perror("sched_setscheduler");
 		return -1;
 	}
 	int ni = setpriority(PRIO_PROCESS, pid, NICE_IDLE);
+	if (ni < 0) {
+		perror("setpriority");
+		return -1;
+	}
 
-	return ret;
+	return 0;
 }

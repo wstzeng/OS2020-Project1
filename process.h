@@ -9,7 +9,7 @@
 #define PARENT_CPU 0
 #define CHILD_CPU  1
 
-#define NICE_WORK -10
+#define NICE_WORK -20
 #define NICE_IDLE 19
 
 #define UNIT_T() { volatile unsigned long i; for(i=0;i<1000000UL;i++); }
