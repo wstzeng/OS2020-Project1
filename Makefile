@@ -18,9 +18,8 @@ all: $(OBJS)
 	$(CC) -c $< $(CFLAG)
 
 demo:
-	@for i in $(DEMO); \
-	do make --no-print-directory $(patsubst %.txt, %, $(DEMO)) IN=$(IN_DIR)$$i; \
-	done
+	@make --no-print-directory $(patsubst %.txt, %, $(DEMO)) IN=$(IN_DIR)$$i
+	@make --no-print-directory clean
 
 $(TASK): 
 	sudo dmesg --clear
@@ -35,17 +34,19 @@ $(TASK_OUT):
 	@echo
 
 run:
-	@for task in $(TASK); \
-	do make --no-print-directory $$task; \
-	done;
-	@echo "Done!"
+	@make --no-print-directory $(TASK)
+#	@for task in $(TASK); \
+#	do make --no-print-directory $$task; \
+#	done;
+#	@echo "Done!"
 
 out2file: clean_out
 	@[ -d $(OUT_DIR) ] || mkdir $(OUT_DIR)
-	@for task in $(TASK_OUT); \
-	do make --no-print-directory $$task; \
-	done
-	@echo "Done!"
+	@make --no-print-directory $(TASK_OUT)
+#	@for task in $(TASK_OUT); \
+#	do make --no-print-directory $$task; \
+#	done
+#	@echo "Done!"
 
 check: $(patsubst %.txt, $(OUT_DIR)%_dmesg.txt, $(DEMO))
 	@for i in $(patsubst %.txt, %_dmesg.txt, $(DEMO)); \
